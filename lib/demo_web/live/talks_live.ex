@@ -1,5 +1,6 @@
 defmodule DemoWeb.TalksLive do
   use Phoenix.LiveView
+  alias DemoWeb.Router.Helpers, as: Routes
 
   @talks_cache :talks_cache
   @normal_style "width: 200px"
@@ -15,7 +16,8 @@ defmodule DemoWeb.TalksLive do
     </form>
     <ul>
       <%= for {talk, by} <- @talks do %>
-        <li><%= talk %> (by <%= by %>)</li>
+        <li><%= talk %> (by <%= by %>)
+        <input type="image" value="<%= talk <> "###" <> by %>" phx-click="remove" src="<%= Routes.static_path(DemoWeb.Endpoint, "/images/trash.png") %>" alt="Remove it!" style="width: 20px; cursor: pointer; margin: 0" /></li>
       <% end %>
     </ul>
     """
@@ -53,8 +55,8 @@ defmodule DemoWeb.TalksLive do
   end
 
   def handle_event("add_talk", %{"talk_name" => talk_name, "talk_by" => talk_by}, socket) do
-    send(self(), :save)
     talks = [{talk_name, talk_by} | socket.assigns.talks] |> Enum.reverse()
+    send(self(), {:save, talks})
 
     {:noreply,
      assign(socket,
@@ -66,8 +68,19 @@ defmodule DemoWeb.TalksLive do
      )}
   end
 
-  def handle_info(:save, socket) do
-    Cachex.put(@talks_cache, "talks", socket.assigns.talks)
+  def handle_event("remove", talk, socket) do
+    [talk_name, talk_by] = String.split(talk, "###")
+    talks = List.delete(socket.assigns.talks, {talk_name, talk_by})
+    send(self(), {:save, talks})
+
+    {:noreply,
+     assign(socket,
+       talks: talks
+     )}
+  end
+
+  def handle_info({:save, talks}, socket) do
+    Cachex.put(@talks_cache, "talks", talks)
     {:ok, true} = Cachex.dump(@talks_cache, "/tmp/talks_cache")
     {:noreply, socket}
   end
