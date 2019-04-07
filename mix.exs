@@ -46,7 +46,8 @@ defmodule Demo.Mixfile do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:cowboy, "~> 2.0"},
-      {:calendar, "~> 0.17.5"}
+      {:calendar, "~> 0.17.5"},
+      {:cachex, "~> 3.1"}
     ]
   end
 

@@ -7,7 +7,16 @@ defmodule Demo.Application do
     children = [
       Demo.Repo,
       DemoWeb.Endpoint,
-      DemoWeb.Presence
+      DemoWeb.Presence,
+      %{
+        id: Cachex,
+        start:
+          {Cachex, :start_link,
+           [
+             :talks_cache,
+             []
+           ]}
+      }
     ]
 
     opts = [strategy: :one_for_one, name: Demo.Supervisor]
