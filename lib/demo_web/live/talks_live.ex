@@ -28,7 +28,7 @@ defmodule DemoWeb.TalksLive do
 
     {:ok,
      assign(socket,
-       talks: Cachex.get!(@talks_cache, "talks"),
+       talks: Cachex.get!(@talks_cache, "talks") || [],
        talk_name: "",
        talk_by: "",
        talk_name_style: @normal_style,
